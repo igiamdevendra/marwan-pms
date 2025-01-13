@@ -1,16 +1,36 @@
-import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
+import { createAsyncThunk, createSlice, PayloadAction } from "@reduxjs/toolkit";
 import axios from "axios";
 
-export const fetchUsers = createAsyncThunk("users/fetchUsers", async () => {
+export interface User {
+  id: string;
+  name: string;
+  coName: string;
+  contact: string;
+  description?: string;
+}
+
+export interface UserState {
+  users: User[];
+  isLoading: boolean;
+  error: string | null;
+}
+
+const initialState: UserState = {
+  users: [],
+  isLoading: false,
+  error: null,
+};
+
+export const fetchUsers = createAsyncThunk<User[]>("users/fetchUsers", async () => {
   const response = await axios.get(
     "https://jsonplaceholder.typicode.com/users"
   );
   return response.data;
 });
 
-export const deleteUserAsync = createAsyncThunk(
+export const deleteUserAsync = createAsyncThunk<string, string>(
   "users/deleteUser",
-  async (id) => {
+  async (id: string) => {
     const response = await axios.delete(
       `https://jsonplaceholder.typicode.com/users/${id}`
     );
@@ -18,7 +38,7 @@ export const deleteUserAsync = createAsyncThunk(
   }
 );
 
-export const addUserAsync = createAsyncThunk("users/addUser", async (value) => {
+export const addUserAsync = createAsyncThunk<User, User>("users/addUser", async (value: User) => {
   const response = await axios.post(
     `https://jsonplaceholder.typicode.com/users/`,
     value
@@ -26,9 +46,9 @@ export const addUserAsync = createAsyncThunk("users/addUser", async (value) => {
   return value;
 });
 
-export const editUserAsync = createAsyncThunk(
+export const editUserAsync = createAsyncThunk<User, User>(
   "users/editUser",
-  async (value) => {
+  async (value: User) => {
     const response = await axios.put(
       `https://jsonplaceholder.typicode.com/users/${value.id}`,
       value
@@ -37,14 +57,9 @@ export const editUserAsync = createAsyncThunk(
   }
 );
 
-const initialState = {
-  users: [],
-  isLoading: false,
-  error: null,
-};
 
 export const userSlice = createSlice({
-  name: "user",
+  name: "users",
   initialState,
   reducers: {},
   extraReducers: (builder) => {
@@ -52,14 +67,14 @@ export const userSlice = createSlice({
     builder.addCase(fetchUsers.pending, (state) => {
       state.isLoading = true;
     });
-    builder.addCase(fetchUsers.fulfilled, (state, action) => {
+    builder.addCase(fetchUsers.fulfilled, (state, action: PayloadAction<User[]>) => {
       state.isLoading = false;
       state.users = action.payload;
       console.log("rak", state.users);
     });
     builder.addCase(fetchUsers.rejected, (state, action) => {
       state.isLoading = false;
-      state.error = action.error.message;
+      state.error = action.error.message || "Failed to fetch users";
     });
 
 
@@ -67,7 +82,7 @@ export const userSlice = createSlice({
     builder.addCase(editUserAsync.pending, (state) => {
       state.isLoading = true;
     });
-    builder.addCase(editUserAsync.fulfilled, (state, action) => {
+    builder.addCase(editUserAsync.fulfilled, (state, action: PayloadAction<User>) => {
       state.isLoading = false;
       state.users = state.users.map((user) =>
         user.id === action.payload.id ? action.payload : user
@@ -75,7 +90,7 @@ export const userSlice = createSlice({
     });
     builder.addCase(editUserAsync.rejected, (state, action) => {
       state.isLoading = false;
-      state.error = action.error.message;
+      state.error = action.error.message || "Failed to edit user";
     });
 
 
@@ -83,7 +98,7 @@ export const userSlice = createSlice({
     builder.addCase(addUserAsync.pending, (state) => {
       state.isLoading = true;
     });
-    builder.addCase(addUserAsync.fulfilled, (state, action) => {
+    builder.addCase(addUserAsync.fulfilled, (state, action: PayloadAction<User>) => {
       state.isLoading = false;
       console.log("add user payload", action.payload);
       state.users.push(action.payload);
@@ -92,7 +107,7 @@ export const userSlice = createSlice({
     builder.addCase(addUserAsync.rejected, (state, action) => {
       state.isLoading = false;
       console.log("first");
-      state.error = action.error.message;
+      state.error = action.error.message || "Failed to add user";
     });
     
 
@@ -100,17 +115,15 @@ export const userSlice = createSlice({
     builder.addCase(deleteUserAsync.pending, (state) => {
       state.isLoading = true;
     });
-    builder.addCase(deleteUserAsync.fulfilled, (state, action) => {
+    builder.addCase(deleteUserAsync.fulfilled, (state, action: PayloadAction<string>) => {
       state.isLoading = false;
-      console.log("action", action);
       state.users = state.users.filter((user) => user.id !== action.payload);
     });
     builder.addCase(deleteUserAsync.rejected, (state, action) => {
       state.isLoading = false;
-      state.error = action.error.message;
+      state.error = action.error.message || "Failed to delete user";
     });
   },
 });
 
 export default userSlice.reducer;
-export const { deleteUser } = userSlice.actions;

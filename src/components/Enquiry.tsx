@@ -1,19 +1,35 @@
-import React from "react";
+import { FC } from "react";
 import CustomTable from "./common/CustomTable";
-import { data } from "../tempData/tempData";
+import { data } from "../tempData/tempData"; // Ensure this data is properly typed
 import CustomButton from "./common/CustomButton";
 
-const Enquiry = () => {
+// Define the type for the data structure
+interface EnquiryData {
+  SI: string;
+  "Enq No.": string;
+  "Enq Type": string;
+  "Enq Title": string;
+  "End-User": string;
+  Plant: string;
+  Client: string;
+  Vendor: string;
+  "Offer Status": string;
+  Resp: string;
+  "Closing Date": string;
+}
+
+const Enquiry: FC = () => {
   const columns = [
     {
       title: "SI",
       dataIndex: "SI",
-      key: "name",
+      key: "SI",
     },
     {
       title: "Enq No.",
       dataIndex: "Enq No.",
       key: "Enq No.",
+     
     },
     {
       title: "Enq Type",
@@ -64,11 +80,10 @@ const Enquiry = () => {
     {
       title: "Edit",
       key: "edit",
-      render: (_, record) => (
+      render: (_: any, record: EnquiryData) => (
         <CustomButton
-          type="ghost"
           title="Edit"
-           className="border border-gray-300 hover:bg-gray-100 px-4 py-2 rounded-md disabled disabled:cursor-not-allowed"
+          className="border border-gray-300 hover:bg-gray-100 px-4 py-2 rounded-md"
           disabled={true}
         />
       ),
@@ -76,34 +91,21 @@ const Enquiry = () => {
     {
       title: "Delete",
       key: "delete",
-      render: (_, record) => (
+      render: (_: any, record: EnquiryData) => (
         <CustomButton
-          type="danger"
           title="Delete"
-          className="border border-red-500 text-red-500 hover:bg-red-100 px-4 py-2 rounded-md disabled disabled:cursor-not-allowed"
+          className="border border-red-500 text-red-500 hover:bg-red-100 px-4 py-2 rounded-md"
           disabled={true}
         />
       ),
     },
-    // {
-    //   title: "Copy",
-    //   key: "Copy",
-    // },
-    // {
-    //   title: "Edit",
-    //   key: "Edit",
-    // },
-    // {
-    //   title: "Delete",
-    //   key: "Delete",
-    // },
   ];
+
   return (
-    <div className = "w-full">
-       <CustomTable columns={columns} data={data} className="w-full h-screen" />
+    <div className="w-full">
+      <CustomTable columns={columns} data={data as EnquiryData[]} className="w-full h-screen" />
     </div>
   );
-
 };
 
 export default Enquiry;

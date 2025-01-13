@@ -1,15 +1,37 @@
-import { Form } from "formik";
-import { ErrorMessage, Field, Formik } from "formik";
+import { Form, Field, ErrorMessage, Formik, FormikHelpers } from "formik";
+import { FC } from "react";
 
-const CustomForm = ({ initialValues, validationSchema, onSubmit, fields }) => {
+// Type definitions for the form fields
+interface FieldType {
+  name: string;
+  label: string;
+  type?: string;
+  placeholder?: string;
+}
+
+interface CustomFormProps<T = Record<string, any>> {
+  initialValues: T;
+  validationSchema: any;
+  onSubmit: (values: T, actions: FormikHelpers<T>) => void;
+  fields: FieldType[];
+}
+
+const CustomForm: FC<CustomFormProps> = ({
+  initialValues,
+  validationSchema,
+  onSubmit,
+  fields,
+}) => {
   return (
     <Formik
       initialValues={initialValues}
       validationSchema={validationSchema}
       onSubmit={onSubmit}
-      enableReinitialize
+      enableReinitialize={true}
+      validateOnBlur={true}
+      validateOnChange={true}
     >
-      {({ isSubmitting }) => (
+      {({ isSubmitting, errors, touched }) => (
         <Form>
           {fields.map((field) => (
             <div key={field.name} className="mb-4">
@@ -34,7 +56,11 @@ const CustomForm = ({ initialValues, validationSchema, onSubmit, fields }) => {
                   name={field.name}
                   type={field.type || "text"}
                   placeholder={field.placeholder}
-                  className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                  className={`mt-1 block w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm ${
+                    errors[field.name] && touched[field.name]
+                      ? "border-red-600"
+                      : "border-gray-300"
+                  }`}
                 />
               )}
               <ErrorMessage
